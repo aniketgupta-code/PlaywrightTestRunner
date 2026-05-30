@@ -1,11 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { fetchCredentials } from "../../utils/credentials";
-import {
-  envBaseUrls,
-  currentTestData,
-  targetEnv,
-  currentTestStatus,
-} from "../../utils";
+import { envBaseUrls, targetEnv, currentTestStatus } from "../../utils";
 import { CommonPage, DashboardPage, PlatformPage } from "../../pages";
 
 test.describe("Login Functionality", () => {
