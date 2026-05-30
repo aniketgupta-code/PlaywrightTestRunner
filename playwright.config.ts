@@ -77,7 +77,7 @@ export default defineConfig({
     ["junit", { outputFile: "./reports/junit-results.xml" }],
     ["html", { outputFolder: "./reports/html", open: "on-failure" }],
   ],
-  outputDir: "./downloads",
+  outputDir: "./downloads/artifacts",
   use: {
     headless: headless,
     actionTimeout: 30_000,
