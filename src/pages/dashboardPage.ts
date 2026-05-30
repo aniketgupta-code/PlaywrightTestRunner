@@ -64,10 +64,10 @@ class CreateProjectDialog {
 }
 
 export class DashboardPage {
+  readonly createProjectDialog: CreateProjectDialog;
   readonly newProjectButton: Locator;
   readonly projectSearchInput: Locator;
   readonly projectListItems: Locator;
-  readonly createProjectDialog: CreateProjectDialog;
   readonly projectNameCells: Locator;
 
   constructor(private readonly page: Page) {
