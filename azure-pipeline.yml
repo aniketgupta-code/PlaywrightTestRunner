@@ -1,0 +1,264 @@
+parameters:
+    - name: Environment
+      type: string
+      default: 'QA'
+      values:
+          - 'DEV'
+          - 'QA'
+          - 'UAT'
+          - 'PROD'
+
+    - name: Browser
+      type: string
+      default: 'chromium'
+      values:
+          - 'chromium'
+          - 'firefox'
+          - 'webkit'
+
+    - name: Module
+      type: string
+      default: 'ALL'
+      values:
+          - 'ALL'
+          - 'adminTool'
+          - 'companyManagement'
+          - 'dashboard'
+          - 'healthCheck'
+          - 'importData'
+          - 'integrations'
+          - 'manageVersions'
+          - 'mapData'
+          - 'ods'
+          - 'platform'
+          - 'projectDetail'
+          - 'runReports'
+          - 'shareFiles'
+          - 'standardGuide'
+          - 'trackChanges'
+          - 'viewPlans'
+
+    - name: TestTag
+      type: string
+      default: '@smoke'
+      values:
+          - '@smoke'
+          - '@PRODSmoke'
+          - '@regression'
+          - '@testreg'
+          - '@E2E'
+          - '@roleTest'
+          - '@identity'
+          - '@notificationPref'
+          - '@PRODSmoke+OR+@identity'
+          - '@regression+And+@!smoke'
+
+    - name: ForceNpmInstall
+      type: boolean
+      default: false
+      values:
+          - true
+          - false
+
+    - name: retryCount
+      type: string
+      default: '0'
+
+name: ${{ parameters.Environment }}-${{ replace(replace(parameters.TestTag, '+', ' '), '@', '') }}-$(BuildID)-$(SourceBranchName)
+
+variables:
+    Test_Env: ${{parameters.Environment}}
+    Browser: ${{parameters.Browser}}
+    tags: ${{parameters.TestTag}}
+    Module: ${{parameters.Module}}
+    ForceNpmInstall: ${{parameters.ForceNpmInstall}}
+    retryCount: ${{parameters.retryCount}}
+
+jobs:
+    - job: test
+      timeoutInMinutes: 360
+      pool:
+          ${{ if eq(parameters.Environment, 'PROD') }}:
+              vmImage: windows-latest
+          ${{ else }}:
+              name: Self-hosted Test
+              demands: Cloud -equals Azure
+
+      steps:
+          - task: NodeTool@0
+            inputs:
+                versionSource: 'spec'
+                versionSpec: '22.x'
+
+          - task: PowerShell@2
+            inputs:
+                targetType: 'inline'
+                script: |
+                    if (Test-Path package-lock.json) {
+                      Copy-Item -Path package-lock.json -Destination package1-lock.json
+                      echo "Package-lock.json copied successfully."
+                    }
+                    else {
+                      echo "Package-lock.json not found at the source path."
+                    }
+            displayName: 'Copy Package Lock File'
+            continueOnError: true
+
+          - checkout: self
+            clean: false
+            persistCredentials: true
+            fetchDepth: 0
+
+          - task: PowerShell@2
+            displayName: 'Validate Code Changes'
+            inputs:
+                targetType: 'inline'
+                script: |
+                    if (Test-Path -Path "node_modules" -PathType Container) {
+                        echo "node_modules folder exists"
+                        $npmInstallForce = [System.Convert]::ToBoolean($env:ForceNpmInstall)
+                        echo "ForceNpmInstall is set to: $npmInstallForce"
+                        $changes = Compare-Object (get-content package1-lock.json) (get-content package-lock.json)
+                        if ($changes -or $npmInstallForce) {
+                            Write-Host "##vso[task.setvariable variable=CodeChanged;]true"
+                            echo "Changes detected in package-lock.json or ForceNpmInstall is True, setting CodeChanged to True"
+                        }
+                        else {
+                            Write-Host "##vso[task.setvariable variable=CodeChanged;]false"
+                            echo "No changes detected in package-lock.json, setting CodeChanged to False"
+                        }
+                    } else {
+                        Write-Host "##vso[task.setvariable variable=CodeChanged;]true"
+                        echo "node_modules folder does not exist, setting CodeChanged to True"
+                    }
+                    Remove-Item -Path package1-lock.json -Force -ErrorAction SilentlyContinue
+            continueOnError: true
+
+          - ${{ if eq(parameters.Environment, 'PROD') }}:
+                - task: PowerShell@2
+                  displayName: 'Validate PROD Test Tag'
+                  inputs:
+                      targetType: 'inline'
+                      script: |
+                          Write-Host "Environment: $(Test_Env)"
+                          Write-Host "TestTag: $(tags)"
+                          if ('$(tags)' -ne '@PRODSmoke') {
+                            Write-Host "##vso[task.logissue type=error]Only PRODSmoke tests can be triggered in PROD environment."
+                            exit 1
+                          }
+                          Write-Host "Validation passed."
+
+          - task: PowerShell@2
+            displayName: 'Add Build Tags'
+            inputs:
+                targetType: 'inline'
+                script: |
+                    Write-Host "##vso[build.addbuildtag]${{ parameters.Environment }}"
+                    Write-Host "##vso[build.addbuildtag]${{ replace(replace(parameters.TestTag, '+', ' '), '@', '') }}"
+                    Write-Host "##vso[build.addbuildtag]${{ parameters.Environment }}-${{ replace(replace(parameters.TestTag, '+', ' '), '@', '') }}"
+            condition: always()
+
+          - task: Npm@1
+            displayName: 'Npm Upgrade'
+            inputs:
+                command: custom
+                workingDir: $(Build.SourcesDirectory)
+                verbose: true
+                customCommand: 'install npm -g --upgrade'
+            condition: and(succeeded(), eq(variables['CodeChanged'], 'true'))
+
+          - task: Npm@1
+            displayName: 'Npm Install'
+            inputs:
+                command: ci
+                customRegistry: useNpmrc
+            condition: and(succeeded(), eq(variables['CodeChanged'], 'true'))
+
+          # Install Playwright browser binaries (only when dependencies changed or forced)
+          - task: PowerShell@2
+            displayName: 'Install Playwright Browsers'
+            inputs:
+                targetType: 'inline'
+                script: npx playwright install --with-deps chromium
+            condition: and(succeeded(), eq(variables['CodeChanged'], 'true'))
+
+          - task: Npm@1
+            displayName: 'Run Playwright Tests'
+            env:
+                Test_Env: $(Test_Env)
+                Browser: $(Browser)
+                tags: $(tags)
+                Module: $(Module)
+                retryCount: $(retryCount)
+                IsRemote: 'true'
+                # Credential env vars — injected from Azure Key Vault / pipeline variables
+                INTERNALUSER_EMAIL: $(SPECINTERNALUSEROVERTURUSER)
+                INTERNALUSER_PASSWORD: $(SPECINTERNALUSEROVERTURPASS)
+                ADMIN_EMAIL: $(OVERTURSPECADMINUSER)
+                ADMIN_PASSWORD: $(OVERTURSPECADMINPASSWORD)
+                ARCHITECT_REVIEWER_EMAIL: $(SPECEXTARCEDUSERUSER)
+                ARCHITECT_REVIEWER_PASSWORD: $(SPECEXTARCEDUSERPASSWORD)
+                HWC_EDITOR_EMAIL: $(SPECEXTHWCEDUSERUSER)
+                HWC_EDITOR_PASSWORD: $(SPECEXTHWCEDUSERPASSWORD)
+                HWC_EDITOR2_EMAIL: $(SPECEXTHWCEDUSER2USER)
+                HWC_EDITOR2_PASSWORD: $(SPECEXTHWCEDUSER2PASSWORD)
+                HWC_REVIEWER_EMAIL: $(SPECEXTHWCRWUSERUSER)
+                HWC_REVIEWER_PASSWORD: $(SPECEXTHWCRWUSERPASSWORD)
+                ARC_REVIEWER_EMAIL: $(SPECEXTARCRWUSERUSER)
+                ARC_REVIEWER_PASSWORD: $(SPECEXTARCCRWUSERPASSWORD)
+                ODS_HWC_REVIEWER_EMAIL: $(SPECEXTODSHWCRWUSERUSER)
+                ODS_HWC_REVIEWER_PASSWORD: $(SPECEXTODSHWCRWUSERPASSWORD)
+                USER1_EMAIL: $(SPECEXTUSER1USER)
+                USER1_PASSWORD: $(SPECEXTUSER1PASSWORD)
+                USER2_EMAIL: $(SPECEXTUSER2USER)
+                USER2_PASSWORD: $(SPECEXTUSER2PASSWORD)
+                DIR_USER_EMAIL: $(SPECEXTDIRUSERUSER)
+                DIR_USER_PASSWORD: $(SPECEXTDIRUSERPASSWORD)
+                FORGET_PASS_USER_EMAIL: $(SPECEXTFORGETPASSUSERUSER)
+                FORGET_PASS_USER_PASSWORD: $(SPECEXTFORGETPASSUSERPASSWORD)
+                BIM360EXPORT_EMAIL: $(SPECBIM360EXPORTUSER)
+                BIM360EXPORT_PASSWORD: $(SPECBIM360EXPORTPASSWORD)
+                PLANGRIDEXPORT_EMAIL: $(SPECPLANGRIDEXPORTUSER)
+                PLANGRIDEXPORT_PASSWORD: $(SPECPLANGRIDEXPORTPASSWORD)
+                PROCOREEXPORT_EMAIL: $(SPECPROCOREEXPORTUSER)
+                PROCOREEXPORT_PASSWORD: $(SPECPROCOREEXPORTPASSWORD)
+                NOTIF_PREF_EMAIL: $(EXTNOTIFPREFUSER)
+                NOTIF_PREF_PASSWORD: $(EXTNOTIFPREFPASSWORD)
+                SPECEXPORT_EMAIL: $(SPECEXPORTUSER)
+                SPECEXPORT_PASSWORD: $(SPECEXPORTPASSWORD)
+            inputs:
+                command: custom
+                workingDir: $(System.DefaultWorkingDirectory)
+                verbose: false
+                customCommand: run test
+
+          - task: PublishTestResults@2
+            displayName: 'Publish JUnit Test Results'
+            inputs:
+                testResultsFormat: JUnit
+                testResultsFiles: 'reports/junit-results.xml'
+                testRunTitle: 'Playwright JUnit Report'
+                failTaskOnFailedTests: false
+            condition: succeededOrFailed()
+
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish HTML Report'
+            inputs:
+                targetPath: $(System.DefaultWorkingDirectory)/reports/html
+                artifact: 'Playwright HTML Report'
+            condition: succeededOrFailed()
+
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish Traces and Videos'
+            inputs:
+                targetPath: $(System.DefaultWorkingDirectory)/media
+                artifact: 'Test Traces and Videos'
+            condition: succeededOrFailed()
+
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish All Reports'
+            inputs:
+                publishLocation: pipeline
+                targetPath: $(System.DefaultWorkingDirectory)/reports
+                artifact: 'Execution Results'
+            condition: succeededOrFailed()

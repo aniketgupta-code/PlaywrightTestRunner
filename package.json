@@ -1,0 +1,31 @@
+{
+	"name": "playwright-test-runner",
+	"version": "1.0.0",
+	"description": "Playwright-based E2E automation framework for Overtur",
+	"scripts": {
+		"test": "playwright test",
+		"test:headed": "playwright test --headed",
+		"report": "playwright show-report ./reports/html",
+		"typecheck": "tsc --noEmit",
+		"record-script": "playwright codegen -o ./media/script.js --target javascript --viewport-size \"1900, 950\"",
+		"showtrace": "npx playwright show-trace ./media/trace.zip"
+	},
+	"devDependencies": {
+		"@playwright/test": "^1.44.0",
+		"@types/chai": "^4.3.0",
+		"@types/node": "^20.0.0",
+		"@types/superagent": "^8.1.0",
+		"chai": "^4.3.10",
+		"chai-arrays": "^2.2.0",
+		"chai-string": "^1.5.0",
+		"cross-env": "^7.0.3",
+		"dotenv": "^16.3.1",
+		"is-ci": "^3.0.1",
+		"moment": "^2.29.4",
+		"superagent": "^8.1.2",
+		"typescript": "^5.4.0"
+	},
+	"dependencies": {
+		"otplib": "^13.4.0"
+	}
+}

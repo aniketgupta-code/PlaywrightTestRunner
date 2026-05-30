@@ -1,0 +1,33 @@
+node_modules/
+
+# Playwright output
+reports/*
+!reports/.gitkeep
+downloads/*
+!downloads/.gitkeep
+test-results/
+playwright-report/
+blob-report/
+
+# Configs & secrets
+configs/
+.env
+*.env
+*.env.local
+
+# TypeScript
+*.js
+*.js.map
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*

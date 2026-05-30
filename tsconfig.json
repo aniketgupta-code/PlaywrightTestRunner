@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": false,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "lib": ["ESNext", "DOM"],
+    "skipLibCheck": true,
+    "types": ["chai", "node"],
+    "typeRoots": ["./node_modules/@types"],
+    "allowImportingTsExtensions": true
+  },
+  "include": [
+    "src/**/*",
+    "playwright.config.ts",
+    "global-setup.ts",
+    "global-teardown.ts"
+  ],
+  "exclude": ["node_modules"]
+}
