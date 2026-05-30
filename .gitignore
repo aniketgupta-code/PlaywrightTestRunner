@@ -2,9 +2,7 @@ node_modules/
 
 # Playwright output
 reports/*
-!reports/.gitkeep
 downloads/*
-!downloads/.gitkeep
 test-results/
 playwright-report/
 blob-report/
