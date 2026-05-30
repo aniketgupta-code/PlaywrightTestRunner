@@ -42,7 +42,7 @@ test.describe("Dashboard", () => {
     "TC_38547_SearchProject",
     { tag: ["@dashboard", "@smoke", "@regression"] },
     async ({ page }) => {
-      const cred = await fetchCredentials("architect_reviewer");
+      const cred = await fetchCredentials("external_user");
       const testData = currentTestData();
       const platformPage = new PlatformPage(page);
       const dashboardPage = new DashboardPage(page);
