@@ -1,5 +1,8 @@
 {
   "TC_38546_CreateProject": {
     "projectNamePrefix": "AUTOMATION_PROJECT_"
+  },
+  "TC_38547_SearchProject": {
+    "projectName": "Release QA Test Project"
   }
 }

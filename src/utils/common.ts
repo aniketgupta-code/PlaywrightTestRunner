@@ -26,3 +26,13 @@ export async function generateOtp(secretKey: string): Promise<string> {
   }
   return totp;
 }
+
+export async function currentTestStatus(): Promise<string> {
+  const status = test.info().status;
+  const error = test.info().error;
+  console.log(`[currentTestStatus] Test status: ${status}`);
+  if (error) {
+    console.error(`[currentTestStatus] Test error: ${error.message}`);
+  }
+  return status;
+}

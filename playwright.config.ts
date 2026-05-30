@@ -80,6 +80,8 @@ export default defineConfig({
   outputDir: "./downloads",
   use: {
     headless: headless,
+    actionTimeout: 30_000,
+    navigationTimeout: 60_000,
     screenshot: "only-on-failure",
     video: playwrightRecordVideo ? "retain-on-failure" : "off",
     trace: "retain-on-failure",
@@ -98,7 +100,7 @@ export function browser() {
       return [
         {
           name: "chrome",
-          use: { channel: "chrome", ...devices["Desktop Chrome"] },
+          use: { channel: "chrome" },
         },
       ];
     case "edge":
@@ -106,19 +108,19 @@ export function browser() {
       return [
         {
           name: "edge",
-          use: { channel: "msedge", ...devices["Desktop Edge"] },
+          use: { channel: "msedge" },
         },
       ];
     case "firefox":
       return [
         {
           name: "firefox",
-          use: { ...devices["Desktop Firefox"] },
+          use: {},
         },
       ];
     case "webkit":
     case "safari":
-      return [{ name: "safari", use: { ...devices["Desktop Safari"] } }];
+      return [{ name: "safari", use: {} }];
     default:
       throw new Error(`Unsupported browser: ${browserName}`);
   }
