@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test } from "@playwright/test";
 import { fetchCredentials } from "../../utils/credentials";
 import { envBaseUrls, targetEnv, currentTestStatus } from "../../utils";
 import { CommonPage, DashboardPage, PlatformPage } from "../../pages";
