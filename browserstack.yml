@@ -1,6 +1,6 @@
 # BrowserStack account credentials (or set BROWSERSTACK_USERNAME / BROWSERSTACK_ACCESS_KEY as env vars)
-userName: aniketkumargupta_20BrZS
-accessKey: gQCyT6y1zZbx5iDGs2AX
+userName:
+accessKey:
 
 # Groups test runs under a named project in the BrowserStack Automate dashboard
 projectName: Playwright Test Runner
