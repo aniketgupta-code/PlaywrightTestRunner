@@ -1,10 +1,11 @@
-import { defineConfig, devices } from "@playwright/test";
+import { defineConfig } from "@playwright/test";
+import isCI from "is-ci";
 import dotenv from "dotenv";
 
 dotenv.config({ path: "./configs/.env" });
 dotenv.config({ path: "./configs/local.env" });
 
-const CI: boolean = JSON.parse(process.env.TF_BUILD ?? "false");
+const CI: boolean = isCI;
 const headless: boolean = JSON.parse(process.env.HEADLESS ?? "false");
 const retryCount: number = parseInt(process.env.RETRY_COUNT ?? "0", 10);
 const workerCount: number = parseInt(process.env.WORKER_COUNT ?? "1", 10);
@@ -75,7 +76,10 @@ export default defineConfig({
   reporter: [
     ["list"],
     ["junit", { outputFile: "./reports/junit-results.xml" }],
-    ["html", { outputFolder: "./reports/html", open: "on-failure" }],
+    [
+      "html",
+      { outputFolder: "./reports/html", open: CI ? "never" : "on-failure" },
+    ],
   ],
   outputDir: "./downloads/artifacts",
   use: {

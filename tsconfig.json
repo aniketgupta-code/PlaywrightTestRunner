@@ -13,7 +13,7 @@
     "experimentalDecorators": true,
     "lib": ["ESNext", "DOM"],
     "skipLibCheck": true,
-    "types": ["chai", "node"],
+    "types": ["node"],
     "typeRoots": ["./node_modules/@types"],
     "allowImportingTsExtensions": true
   },

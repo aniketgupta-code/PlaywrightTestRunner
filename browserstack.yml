@@ -19,7 +19,7 @@ platforms:
     browserVersion: latest
   - os: Windows
     osVersion: 11
-    browserName: Firefox
+    browserName: playwright-firefox
     browserVersion: latest
 
 # Delegates parallel worker count to playwright.config.ts `workers` setting
