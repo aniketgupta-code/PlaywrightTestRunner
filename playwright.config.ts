@@ -5,7 +5,6 @@ import dotenv from "dotenv";
 dotenv.config({ path: "./configs/.env" });
 dotenv.config({ path: "./configs/local.env" });
 
-const CI: boolean = isCI;
 const headless: boolean = JSON.parse(process.env.HEADLESS ?? "false");
 const retryCount: number = parseInt(process.env.RETRY_COUNT ?? "0", 10);
 const workerCount: number = parseInt(process.env.WORKER_COUNT ?? "1", 10);
@@ -21,41 +20,28 @@ const playwrightRecordVideo: boolean = JSON.parse(
   process.env.PLAYWRIGHT_RECORD_VIDEO ?? "false",
 );
 
-// Build grep/grepInvert from the tags env var.
-// Supports formats carried over from the existing pipeline TestTag parameter:
-//   @smoke                          → grep /@smoke/
-//   @smoke,@regression              → grep /@smoke|@regression/
-//   @PRODSmoke+OR+@identity         → grep /@PRODSmoke|@identity/
-//   @regression+And+@!smoke         → grep /@regression/, grepInvert /@smoke/
 function buildGrepConfig(tagsEnv: string | undefined): {
   grep?: RegExp;
   grepInvert?: RegExp;
 } {
   if (!tagsEnv) return {};
 
-  // Handle +AND+ with potential negation: "@regression+And+@!smoke"
-  if (/\+and\+/i.test(tagsEnv)) {
-    const parts = tagsEnv.split(/\+and\+/i).map((t) => t.trim());
-    const required = parts
-      .filter((p) => !p.startsWith("@!"))
-      .map((p) => (p.startsWith("@") ? p : `@${p}`));
-    const excluded = parts
-      .filter((p) => p.startsWith("@!"))
-      .map((p) => p.replace(/^@!/, "@"));
-    return {
-      grep: required.length ? new RegExp(required.join("|")) : undefined,
-      grepInvert: excluded.length ? new RegExp(excluded.join("|")) : undefined,
-    };
-  }
-
-  // Handle +OR+ and plain comma-separated: "@PRODSmoke+OR+@identity" or "@smoke,@regression"
-  const tagList = tagsEnv
-    .split(/\+or\+|,/i)
+  const normalize = (t: string) => (t.startsWith("@") ? t : `@${t}`);
+  const tags = tagsEnv
+    .split(",")
     .map((t) => t.trim())
-    .filter(Boolean)
-    .map((t) => (t.startsWith("@") ? t : `@${t}`));
+    .filter(Boolean);
 
-  return { grep: new RegExp(tagList.join("|")) };
+  const included = tags.filter((t) => !t.startsWith("!")).map(normalize);
+
+  const excluded = tags
+    .filter((t) => t.startsWith("!"))
+    .map((t) => normalize(t.slice(1)));
+
+  return {
+    grep: included.length ? new RegExp(included.join("|")) : undefined,
+    grepInvert: excluded.length ? new RegExp(excluded.join("|")) : undefined,
+  };
 }
 
 const { grep, grepInvert } = buildGrepConfig(process.env.TAGS);
@@ -64,13 +50,15 @@ export default defineConfig({
   testDir: "./src/specs",
   testMatch: "**/src/specs/**/*.spec.ts",
   fullyParallel: false,
-  workers: workerCount,
-  projects: browser(),
-  retries: retryCount,
+  ...(!JSON.parse(process.env.BROWSERSTACK_SDK ?? "false") && {
+    workers: workerCount,
+    projects: browser(),
+    retries: retryCount,
+  }),
   timeout: 1_000_000,
   grep,
   grepInvert,
-  forbidOnly: CI,
+  forbidOnly: isCI ?? false,
   globalSetup: "./global-setup.ts",
   globalTeardown: "./global-teardown.ts",
   reporter: [
@@ -78,7 +66,13 @@ export default defineConfig({
     ["junit", { outputFile: "./reports/junit-results.xml" }],
     [
       "html",
-      { outputFolder: "./reports/html", open: CI ? "never" : "on-failure" },
+      {
+        outputFolder: "./reports/html",
+        open:
+          isCI || JSON.parse(process.env.BROWSERSTACK_SDK ?? "false")
+            ? "never"
+            : "on-failure",
+      },
     ],
   ],
   outputDir: "./downloads/artifacts",
@@ -96,10 +90,16 @@ export default defineConfig({
   },
 });
 
-export function browser() {
-  const browserName = process.env.BROWSER ?? "chrome";
+function browser() {
+  const browserName = process.env.BROWSER ?? "chromium";
   switch (browserName.toLowerCase()) {
     case "chromium":
+      return [
+        {
+          name: "chromium",
+          use: {},
+        },
+      ];
     case "chrome":
       return [
         {

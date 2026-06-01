@@ -30,3 +30,9 @@ NUL
 # Logs
 *.log
 npm-debug.log*
+
+# BrowserStack
+log
+browserstackSetupConfig.json
+playwright-browserstack-sdk.config.temp.json
+playwright-browserstack-sdk.config.ts

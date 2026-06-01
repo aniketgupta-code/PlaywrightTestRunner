@@ -1,6 +1,6 @@
 # BrowserStack account credentials (or set BROWSERSTACK_USERNAME / BROWSERSTACK_ACCESS_KEY as env vars)
-userName:
-accessKey:
+userName: "${BROWSERSTACK_USERNAME}"
+accessKey: "${BROWSERSTACK_ACCESS_KEY}"
 
 # Groups test runs under a named project in the BrowserStack Automate dashboard
 projectName: Playwright Test Runner
@@ -22,8 +22,11 @@ platforms:
     browserName: playwright-firefox
     browserVersion: latest
 
-# Delegates parallel worker count to playwright.config.ts `workers` setting
-usePlaywrightWorkers: true
+# Number of parallel test sessions to run per platform on BrowserStack
+parallelsPerPlatform: "${WORKER_COUNT}"
+
+# Number of times to retry failed tests
+retries: "${RETRY_COUNT}"
 
 # Enables BrowserStack Local tunnel for non-public URLs; false since target URLs are publicly accessible
 browserstackLocal: false
@@ -39,3 +42,7 @@ consoleLogs: errors
 
 # Sends test results to BrowserStack Test Reporting and Analytics dashboard
 testReporting: true
+
+# Automatically updates the BrowserStack Playwright SDK version used for testing
+playwrightVersion: "${BROWSERSTACK_PLAYWRIGHT_VERSION}"
+clientPlaywrightVersion: "${BROWSERSTACK_PLAYWRIGHT_VERSION}"
