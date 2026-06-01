@@ -23,10 +23,7 @@ platforms:
     browserVersion: latest
 
 # Number of parallel test sessions to run per platform on BrowserStack
-parallelsPerPlatform: "${WORKER_COUNT}"
-
-# Number of times to retry failed tests
-retries: "${RETRY_COUNT}"
+parallelsPerPlatform: ${WORKER_COUNT}
 
 # Enables BrowserStack Local tunnel for non-public URLs; false since target URLs are publicly accessible
 browserstackLocal: false
@@ -41,10 +38,12 @@ networkLogs: false
 consoleLogs: errors
 
 # Sends test results to BrowserStack Test Reporting and Analytics dashboard
-testReporting: true
+testReporting: false
 
-# Disable automatic accessibility scanning
+# Enables BrowserStack's test observability features for enhanced debugging and insights
+testObservability: false
 accessibility: false
+percy: false
 
 # Automatically updates the BrowserStack Playwright SDK version used for testing
 playwrightVersion: "${BROWSERSTACK_PLAYWRIGHT_VERSION}"

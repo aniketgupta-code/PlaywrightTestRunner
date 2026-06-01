@@ -53,8 +53,8 @@ export default defineConfig({
   ...(!JSON.parse(process.env.BROWSERSTACK_SDK ?? "false") && {
     workers: workerCount,
     projects: browser(),
-    retries: retryCount,
   }),
+  retries: retryCount,
   timeout: 1_000_000,
   grep,
   grepInvert,
