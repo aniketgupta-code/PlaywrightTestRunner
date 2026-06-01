@@ -43,6 +43,9 @@ consoleLogs: errors
 # Sends test results to BrowserStack Test Reporting and Analytics dashboard
 testReporting: true
 
+# Disable automatic accessibility scanning
+accessibility: false
+
 # Automatically updates the BrowserStack Playwright SDK version used for testing
 playwrightVersion: "${BROWSERSTACK_PLAYWRIGHT_VERSION}"
 clientPlaywrightVersion: "${BROWSERSTACK_PLAYWRIGHT_VERSION}"
