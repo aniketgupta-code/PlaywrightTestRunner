@@ -13,7 +13,7 @@ test.describe("Login Functionality", () => {
     "TC_38545_LoginLogoutTest",
     { tag: ["@login", "@smoke", "@regression"] },
     async ({ page }) => {
-      const cred = await fetchCredentials("external_user");
+      const cred = await fetchCredentials("demo-user");
       const platformPage = new PlatformPage(page);
       const dashboardPage = new DashboardPage(page);
       const commonPage = new CommonPage(page);

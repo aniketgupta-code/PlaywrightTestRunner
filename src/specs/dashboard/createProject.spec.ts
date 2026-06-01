@@ -19,7 +19,7 @@ test.describe("Dashboard", () => {
     "TC_38546_CreateProject",
     { tag: ["@dashboard", "@regression"] },
     async ({ page }) => {
-      const creds = await fetchCredentials("external_user");
+      const creds = await fetchCredentials("external-user");
       const email = creds.email;
       const password = creds.password;
       const otpToken = creds.secret;
@@ -42,7 +42,7 @@ test.describe("Dashboard", () => {
     "TC_38547_SearchProject",
     { tag: ["@dashboard", "@smoke", "@regression"] },
     async ({ page }) => {
-      const cred = await fetchCredentials("external_user");
+      const cred = await fetchCredentials("external-user");
       const testData = currentTestData();
       const platformPage = new PlatformPage(page);
       const dashboardPage = new DashboardPage(page);

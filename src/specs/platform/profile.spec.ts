@@ -13,7 +13,7 @@ test.describe("User Profile", () => {
     "TC_38545_VerifyUserProfile",
     { tag: ["@profile", "@regression"] },
     async ({ page }) => {
-      const cred = await fetchCredentials("external_user");
+      const cred = await fetchCredentials("support-user");
       const platformPage = new PlatformPage(page);
       const dashboardPage = new DashboardPage(page);
       const commonPage = new CommonPage(page);
