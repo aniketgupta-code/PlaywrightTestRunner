@@ -19,6 +19,9 @@ const viewportHeight: number = parseInt(
 const playwrightRecordVideo: boolean = JSON.parse(
   process.env.PLAYWRIGHT_RECORD_VIDEO ?? "false",
 );
+const browserstackSdk: boolean = JSON.parse(
+  process.env.BROWSERSTACK_SDK ?? "false",
+);
 
 function buildGrepConfig(tagsEnv: string | undefined): {
   grep?: RegExp;
@@ -50,7 +53,7 @@ export default defineConfig({
   testDir: "./src/specs",
   testMatch: "**/src/specs/**/*.spec.ts",
   fullyParallel: false,
-  ...(!JSON.parse(process.env.BROWSERSTACK_SDK ?? "false") && {
+  ...(!browserstackSdk && {
     workers: workerCount,
     projects: browser(),
   }),
@@ -68,10 +71,7 @@ export default defineConfig({
       "html",
       {
         outputFolder: "./reports/html",
-        open:
-          isCI || JSON.parse(process.env.BROWSERSTACK_SDK ?? "false")
-            ? "never"
-            : "on-failure",
+        open: isCI || browserstackSdk ? "never" : "on-failure",
       },
     ],
   ],

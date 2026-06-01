@@ -1,6 +1,12 @@
-import { test } from "playwright/test";
+import { Page, test } from "playwright/test";
 import testData from "../data/testData.json";
 import { generate, verify } from "otplib";
+
+import dotenv from "dotenv";
+dotenv.config({ path: "./configs/.env" });
+const browserstackSdk: boolean = JSON.parse(
+  process.env.BROWSERSTACK_SDK ?? "false",
+);
 
 /** Current test environment (DEV | QA | UAT | PROD). Defaults to QA. */
 export const targetEnv: string = (process.env.TARGET_ENV ?? "QA").toUpperCase();
@@ -35,4 +41,22 @@ export async function currentTestStatus(): Promise<string> {
     console.error(`[currentTestStatus] Test error: ${error.message}`);
   }
   return status;
+}
+
+export async function attachBrowserStackSessionLink(page: Page): Promise<void> {
+  try {
+    if (!browserstackSdk) return;
+    const sessionDetailsString = await page.evaluate(
+      () => 'browserstack_executor: {"action": "getSessionDetails"}',
+    );
+    const sessionDetails = JSON.parse(sessionDetailsString);
+    test.info().attach("BrowserStack Session Link", {
+      body: sessionDetails.browser_url,
+      contentType: "text/plain",
+    });
+  } catch (error) {
+    console.error(
+      `[attachBrowserStackSessionLink] Failed to attach session link: ${(error as Error).message}`,
+    );
+  }
 }

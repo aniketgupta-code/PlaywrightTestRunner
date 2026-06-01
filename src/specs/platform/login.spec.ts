@@ -1,6 +1,11 @@
 import { test } from "@playwright/test";
 import { fetchCredentials } from "../../utils/credentials";
-import { envBaseUrls, targetEnv, currentTestStatus } from "../../utils";
+import {
+  envBaseUrls,
+  targetEnv,
+  currentTestStatus,
+  attachBrowserStackSessionLink,
+} from "../../utils";
 import { CommonPage, DashboardPage, PlatformPage } from "../../pages";
 
 test.describe("Login Functionality", () => {
@@ -24,8 +29,9 @@ test.describe("Login Functionality", () => {
     },
   );
 
-  test.afterEach(async () => {
+  test.afterEach(async ({ page }) => {
     const status = await currentTestStatus();
+    await attachBrowserStackSessionLink(page);
     console.log(`[afterEach] Test completed with status: ${status}`);
   });
 });

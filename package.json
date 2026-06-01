@@ -10,7 +10,6 @@
     "typecheck": "tsc --noEmit",
     "record-script": "playwright codegen -o ./media/script.js --target javascript --viewport-size \"1900, 950\"",
     "showtrace": "npx playwright show-trace ./media/trace.zip",
-    "update:browserstack": "npm update browserstack-node-sdk --save-dev",
     "test:browserstack": "browserstack-node-sdk playwright test",
     "test:browserstack:smoke": "cross-env TAGS=@smoke browserstack-node-sdk playwright test",
     "local:test:browserstack": "node run-browserstack.js"
@@ -19,7 +18,7 @@
     "@playwright/test": "1.59.1",
     "@types/node": "^20.0.0",
     "@types/superagent": "^8.1.0",
-    "browserstack-node-sdk": "^1.55.4",
+    "browserstack-node-sdk": "^1.55.5",
     "cross-env": "^7.0.3",
     "dotenv": "^16.3.1",
     "is-ci": "^3.0.1",
