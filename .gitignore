@@ -16,6 +16,7 @@ configs/
 # TypeScript
 *.js.map
 dist/
+rough.ts
 
 # OS
 .DS_Store
