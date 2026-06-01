@@ -1,0 +1,50 @@
+# BrowserStack account credentials (or set BROWSERSTACK_USERNAME / BROWSERSTACK_ACCESS_KEY as env vars)
+userName: "${BROWSERSTACK_USERNAME}"
+accessKey: "${BROWSERSTACK_ACCESS_KEY}"
+
+# Groups test runs under a named project in the BrowserStack Automate dashboard
+projectName: Playwright Test Runner
+
+# Human-readable label for this test suite run; buildIdentifier appends a unique suffix
+buildName: Web App E2E
+
+# Unique suffix appended to buildName per execution — ${DATE_TIME} or ${BUILD_NUMBER}
+buildIdentifier: "${DATE_TIME}"
+
+# Browser/OS combinations to execute tests on (full list: browserstack.com/list-of-browsers-and-platforms/automate)
+platforms:
+  - os: Windows
+    osVersion: 11
+    browserName: Chrome
+    browserVersion: latest
+  - os: Windows
+    osVersion: 11
+    browserName: playwright-firefox
+    browserVersion: latest
+
+# Number of parallel test sessions to run per platform on BrowserStack
+parallelsPerPlatform: ${WORKER_COUNT}
+
+# Enables BrowserStack Local tunnel for non-public URLs; false since target URLs are publicly accessible
+browserstackLocal: false
+
+# Captures a screenshot for every Playwright command (verbose; enable only for deep debugging)
+debug: false
+
+# Captures network traffic as HAR logs for request/response debugging
+networkLogs: false
+
+# Remote browser console log level: disable | errors | warnings | info | verbose
+consoleLogs: errors
+
+# Sends test results to BrowserStack Test Reporting and Analytics dashboard
+testReporting: false
+
+# Enables BrowserStack's test observability features for enhanced debugging and insights
+testObservability: false
+accessibility: false
+percy: false
+
+# Automatically updates the BrowserStack Playwright SDK version used for testing
+playwrightVersion: "${BROWSERSTACK_PLAYWRIGHT_VERSION}"
+clientPlaywrightVersion: "${BROWSERSTACK_PLAYWRIGHT_VERSION}"

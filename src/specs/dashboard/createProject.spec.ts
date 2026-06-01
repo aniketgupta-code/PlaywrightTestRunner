@@ -1,9 +1,10 @@
-import { test, expect } from "@playwright/test";
+import { test } from "@playwright/test";
 import {
   targetEnv,
   envBaseUrls,
   currentTestData,
   fetchCredentials,
+  currentTestStatus,
 } from "../../utils";
 import { DashboardPage, PlatformPage, CommonPage } from "../../pages";
 import moment from "moment";
@@ -11,16 +12,14 @@ import moment from "moment";
 test.describe("Dashboard", () => {
   test.beforeEach(async ({ page }) => {
     const platformPage = new PlatformPage(page);
-    const commonPage = new CommonPage(page);
-    await commonPage.navigateTo(envBaseUrls[targetEnv].url);
-    await platformPage.verifyLogoAndWelcomeText();
+    await platformPage.navigateToBasePage(envBaseUrls[targetEnv].url);
   });
 
   test(
     "TC_38546_CreateProject",
     { tag: ["@dashboard", "@regression"] },
     async ({ page }) => {
-      const creds = await fetchCredentials("external_user");
+      const creds = await fetchCredentials("external-user");
       const email = creds.email;
       const password = creds.password;
       const otpToken = creds.secret;
@@ -29,27 +28,32 @@ test.describe("Dashboard", () => {
       const dashboardPage = new DashboardPage(page);
 
       await platformPage.login(email, password, otpToken);
+      await dashboardPage.waitForDashboardLoad();
 
       const projectName = `${testData.projectNamePrefix}${moment().format("YYYYMMDD_HHmmss")}`;
-      console.log("Creating Project:", projectName);
 
       await dashboardPage.clickCreateNewProjectButton();
-      await dashboardPage.createProjectDialog.create(projectName);
+      await dashboardPage.createProjectDialog.createProject(projectName);
       await dashboardPage.verifyProjectCreated();
     },
   );
 
-  // test(
-  //   "TC_38547_SearchProject",
-  //   { tag: ["@dashboard", "@regression"] },
-  //   async ({ page }) => {
-  //     const creds = await fetchCredentials("architect_reviewer");
-  //     await PlatformPage.login(page, creds.email, creds.password);
+  test(
+    "TC_38547_SearchProject",
+    { tag: ["@dashboard", "@smoke", "@regression"] },
+    async ({ page }) => {
+      const cred = await fetchCredentials("external-user");
+      const testData = currentTestData();
+      const platformPage = new PlatformPage(page);
+      const dashboardPage = new DashboardPage(page);
+      await platformPage.login(cred.email, cred.password, cred.secret);
+      await dashboardPage.waitForDashboardLoad();
+      await dashboardPage.searchAndOpenProject(testData.projectName);
+    },
+  );
 
-  //     await DashboardPage.searchProject(page, "AUTOMATION_");
-  //     await expect(
-  //       page.locator('[data-testid="project-list-item"]').first(),
-  //     ).toBeVisible({ timeout: 15_000 });
-  //   },
-  // );
+  test.afterEach(async () => {
+    const status = await currentTestStatus();
+    console.log(`[afterEach] Test completed with status: ${status}`);
+  });
 });

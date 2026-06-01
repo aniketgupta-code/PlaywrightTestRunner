@@ -2,9 +2,7 @@ node_modules/
 
 # Playwright output
 reports/*
-!reports/.gitkeep
 downloads/*
-!downloads/.gitkeep
 test-results/
 playwright-report/
 blob-report/
@@ -16,13 +14,14 @@ configs/
 *.env.local
 
 # TypeScript
-*.js
 *.js.map
 dist/
+rough.ts
 
 # OS
 .DS_Store
 Thumbs.db
+NUL
 
 # IDE
 .vscode/
@@ -31,3 +30,9 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+
+# BrowserStack
+log
+browserstackSetupConfig.json
+playwright-browserstack-sdk.config.temp.json
+playwright-browserstack-sdk.config.ts
