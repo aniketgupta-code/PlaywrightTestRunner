@@ -11,6 +11,7 @@ async function globalSetup(_config: FullConfig): Promise<void> {
       continue;
     }
     for (const entry of fs.readdirSync(resolved)) {
+      if (entry === ".gitkeep") continue;
       fs.rmSync(path.join(resolved, entry), { recursive: true, force: true });
     }
   }
