@@ -1,6 +1,7 @@
 import { FullConfig } from "@playwright/test";
 import * as fs from "fs";
 import * as path from "path";
+import { logger } from "./src/utils";
 
 async function globalSetup(_config: FullConfig): Promise<void> {
   for (const dir of ["reports", "downloads"]) {
@@ -13,7 +14,7 @@ async function globalSetup(_config: FullConfig): Promise<void> {
       fs.rmSync(path.join(resolved, entry), { recursive: true, force: true });
     }
   }
-  console.log("Global Setup - Output directories cleaned.");
+  logger.info("Global Setup - Output directories cleaned.");
 }
 
 export default globalSetup;

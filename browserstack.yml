@@ -1,15 +1,16 @@
 # BrowserStack account credentials (or set BROWSERSTACK_USERNAME / BROWSERSTACK_ACCESS_KEY as env vars)
-userName: "${BROWSERSTACK_USERNAME}"
-accessKey: "${BROWSERSTACK_ACCESS_KEY}"
+userName: ${BROWSERSTACK_USERNAME}
+accessKey: ${BROWSERSTACK_ACCESS_KEY}
 
 # Groups test runs under a named project in the BrowserStack Automate dashboard
-projectName: Playwright Test Runner
+projectName: ${PROJECT_NAME}
 
 # Human-readable label for this test suite run; buildIdentifier appends a unique suffix
-buildName: Web App E2E
+buildName: ${BUILD_NAME}
+buildTag: ${TAGS}
 
 # Unique suffix appended to buildName per execution — ${DATE_TIME} or ${BUILD_NUMBER}
-buildIdentifier: "${DATE_TIME}"
+buildIdentifier: ${DATE_TIME}
 
 # Browser/OS combinations to execute tests on (full list: browserstack.com/list-of-browsers-and-platforms/automate)
 platforms:
@@ -37,14 +38,9 @@ networkLogs: false
 # Remote browser console log level: disable | errors | warnings | info | verbose
 consoleLogs: errors
 
-# Sends test results to BrowserStack Test Reporting and Analytics dashboard
-testReporting: false
-
 # Enables BrowserStack's test observability features for enhanced debugging and insights
-testObservability: false
+testObservability: true
 accessibility: false
-percy: false
 
 # Automatically updates the BrowserStack Playwright SDK version used for testing
-playwrightVersion: "${BROWSERSTACK_PLAYWRIGHT_VERSION}"
-clientPlaywrightVersion: "${BROWSERSTACK_PLAYWRIGHT_VERSION}"
+playwrightVersion: ${BROWSERSTACK_PLAYWRIGHT_VERSION}

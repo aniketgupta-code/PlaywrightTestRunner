@@ -19,15 +19,15 @@ Playwright-based end-to-end test automation framework for the Overtur applicatio
 ```
 src/
   pages/              # Page Object Model classes (locators + actions)
-    common-page.ts
-    dashboard-page.ts
-    platform-page.ts
+    commonPage.ts
+    dashboardPage.ts
+    platformPage.ts
     index.ts
   specs/              # Test files grouped by module
     dashboard/
     platform/
   data/
-    test-data.json    # Hardcoded test data keyed by test case title
+    testData.json     # Hardcoded test data keyed by test case title
   utils/
     common.ts         # Shared helpers, env config, OTP generation
     credentials.ts    # Credential fetching from environment variables
@@ -91,12 +91,12 @@ The base `configs/.env` is also gitignored. Copy from a team member or password 
 
 ## Running Tests
 
-| Command               | Description                                 |
-| --------------------- | ------------------------------------------- |
-| `npm test`            | Run all tests headless                      |
-| `npm run test:headed` | Run all tests with browser visible          |
-| `npm run report`      | Open the last HTML report                   |
-| `npm run typecheck`   | TypeScript type check without running tests |
+| Command                 | Description                                 |
+| ----------------------- | ------------------------------------------- |
+| `npm test`              | Run all tests headless                      |
+| `npm run test:headless` | Force all tests to run in headless mode     |
+| `npm run report`        | Open the last HTML report                   |
+| `npm run typecheck`     | TypeScript type check without running tests |
 
 ### Filter by tag
 
@@ -104,6 +104,22 @@ The base `configs/.env` is also gitignored. Copy from a team member or password 
 npx playwright test --grep @smoke
 npx playwright test --grep @regression
 ```
+
+You can also use the `TAGS` env var, which supports comma-separated lists and exclusions:
+
+```bash
+# Run tests matching any of the listed tags
+cross-env TAGS=@smoke npm test
+cross-env TAGS=@smoke,@regression npm test
+
+# Exclude a tag with !
+cross-env TAGS=!@slow npm test
+
+# Pre-built shortcut
+npm run test:smoke
+```
+
+`@` is optional — `TAGS=smoke` and `TAGS=@smoke` are equivalent. Exclusions take precedence over inclusions when combined.
 
 ### Filter by browser
 
@@ -125,7 +141,7 @@ npx playwright test src/specs/dashboard
 
 ### Test data
 
-Add test case data to `src/test-fixtures/test-store.json` keyed by the test case title:
+Add test case data to `src/data/testData.json` keyed by the test case title:
 
 ```json
 {
@@ -176,6 +192,41 @@ The pipeline (`azure-pipeline.yml`) supports the following parameters:
 Credentials are injected from Azure Key Vault pipeline variables — no secrets are stored in the repo.
 
 > **Note:** Only `@PRODSmoke` tagged tests are permitted to run against the PROD environment.
+
+---
+
+## BrowserStack
+
+Tests can be run on BrowserStack's cloud device grid. Browser/OS combinations are configured in `browserstack.yml`.
+
+### Prerequisites
+
+Add your BrowserStack credentials to `configs/.env`:
+
+```ini
+BROWSERSTACK_USERNAME=your_username
+BROWSERSTACK_ACCESS_KEY=your_access_key
+```
+
+### Running on BrowserStack
+
+```bash
+npm run test:browserstack           # all tests
+npm run test:browserstack:smoke     # @smoke tests only
+```
+
+### Local execution
+
+`run-browserstack.js` loads `configs/.env`, sets the required SDK env vars, and wraps the BrowserStack SDK command. It accepts any additional Playwright arguments:
+
+```bash
+node run-browserstack.js
+node run-browserstack.js --grep @smoke
+node run-browserstack.js src/specs/dashboard
+
+# Or via npm
+npm run local:test:browserstack
+```
 
 ---
 

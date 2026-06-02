@@ -1,4 +1,5 @@
 import { Page, Locator, expect } from "@playwright/test";
+import { logger } from "../utils";
 
 class CreateProjectDialog {
   readonly dialog: Locator;
@@ -35,29 +36,29 @@ class CreateProjectDialog {
   }
 
   async createProject(projectName: string): Promise<void> {
-    console.log("[createProject] Waiting for dialog to be visible");
+    logger.info("[createProject] Waiting for dialog to be visible");
     await expect(this.dialog).toBeVisible({
       timeout: 5_000,
     });
     await expect(this.dialogTitle).toHaveText("Create New Project");
     await this.page.waitForTimeout(1_000);
-    console.log("[createProject] Selecting 'Design' stage");
+    logger.info("[createProject] Selecting 'Design' stage");
     await this.dynamicSelectors.stageChecker("Design").click();
-    console.log("[createProject] Clicking Next");
+    logger.info("[createProject] Clicking Next");
     await this.nextButton.click();
     await this.page.waitForTimeout(1_000);
     await expect(this.dialogTitle).toHaveText("Create New Project");
-    console.log("[createProject] Selecting project type 'Demo/Training'");
+    logger.info("[createProject] Selecting project type 'Demo/Training'");
     await this.projectTypeDropdown.click();
     await this.dynamicSelectors.projectTypeOption("Demo/Training").click();
     await this.page.waitForTimeout(500);
-    console.log(`[createProject] Filling project name: ${projectName}`);
+    logger.info(`[createProject] Filling project name: ${projectName}`);
     await this.projectNameInput.fill(projectName);
-    console.log("[createProject] Selecting 'No' for require help");
+    logger.info("[createProject] Selecting 'No' for require help");
     await this.dynamicSelectors.requireHelpOption("No").check();
-    console.log("[createProject] Clicking Create Project");
+    logger.info("[createProject] Clicking Create Project");
     await this.createProjectButton.click();
-    console.log("[createProject] Waiting for network idle");
+    logger.info("[createProject] Waiting for network idle");
     await this.page.waitForTimeout(2_000);
     await this.page.waitForLoadState("networkidle");
   }
@@ -81,36 +82,36 @@ export class DashboardPage {
   }
 
   async waitForDashboardLoad(): Promise<void> {
-    console.log("[waitForDashboardLoad] Waiting for New Project button");
+    logger.info("[waitForDashboardLoad] Waiting for New Project button");
     await expect(this.newProjectButton).toBeVisible({
       timeout: 10_000,
     });
-    console.log("[waitForDashboardLoad] Waiting for search input");
+    logger.info("[waitForDashboardLoad] Waiting for search input");
     await expect(this.projectSearchInput).toBeVisible({
       timeout: 10_000,
     });
-    console.log("[waitForDashboardLoad] Waiting for project list to populate");
+    logger.info("[waitForDashboardLoad] Waiting for project list to populate");
     await expect(this.projectListItems.first()).toBeVisible({
       timeout: 30_000,
     });
     await this.page.waitForTimeout(5_000);
-    console.log("[waitForDashboardLoad] Dashboard loaded");
+    logger.info("[waitForDashboardLoad] Dashboard loaded");
   }
 
   async clickCreateNewProjectButton(): Promise<void> {
-    console.log("[clickCreateNewProjectButton] Clicking Create New Project");
+    logger.info("[clickCreateNewProjectButton] Clicking Create New Project");
     await this.newProjectButton.click();
     await this.page.waitForTimeout(1_000);
   }
 
   async verifyProjectCreated(): Promise<void> {
-    console.log("[verifyProjectCreated] Verifying URL contains project ID");
+    logger.info("[verifyProjectCreated] Verifying URL contains project ID");
     await this.page.waitForURL(/\/projects\/\d+/i, {
       timeout: 10_000,
     });
     await expect(this.page).toHaveURL(/\/projects\/\d+/i);
     await this.page.waitForTimeout(5_000);
-    console.log("[verifyProjectCreated] Project created successfully");
+    logger.info("[verifyProjectCreated] Project created successfully");
   }
 
   async searchAndOpenProject(searchTerm: string): Promise<void> {
