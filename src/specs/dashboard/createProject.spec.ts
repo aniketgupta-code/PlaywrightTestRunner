@@ -1,5 +1,6 @@
 import { test } from "@playwright/test";
 import {
+  logger,
   targetEnv,
   envBaseUrls,
   currentTestData,
@@ -54,6 +55,6 @@ test.describe("Dashboard", () => {
 
   test.afterEach(async () => {
     const status = await currentTestStatus();
-    console.log(`[afterEach] Test completed with status: ${status}`);
+    logger.info(`[afterEach] Test completed with status: ${status}`);
   });
 });

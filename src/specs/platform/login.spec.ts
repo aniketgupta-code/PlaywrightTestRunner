@@ -1,5 +1,5 @@
 import { test } from "@playwright/test";
-import { fetchCredentials } from "../../utils/credentials";
+import { fetchCredentials, logger } from "../../utils";
 import {
   envBaseUrls,
   targetEnv,
@@ -32,6 +32,6 @@ test.describe("Login Functionality", () => {
   test.afterEach(async ({ page }) => {
     const status = await currentTestStatus();
     await attachBrowserStackSessionLink(page);
-    console.log(`[afterEach] Test completed with status: ${status}`);
+    logger.info(`[afterEach] Test completed with status: ${status}`);
   });
 });

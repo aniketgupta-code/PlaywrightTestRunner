@@ -1,5 +1,6 @@
 import { expect, Locator, Page } from "@playwright/test";
-import { PlatformPage } from "./platformPage";
+import { PlatformPage } from "./";
+import { logger } from "../utils";
 
 class ProfilePage {
   readonly profileHeader: Locator;
@@ -11,13 +12,13 @@ class ProfilePage {
   }
 
   async verifyUserProfile(): Promise<void> {
-    console.log("[verifyUserProfile] Verifying user profile page");
+    logger.info("[verifyUserProfile] Verifying user profile page");
     await this.page.bringToFront();
 
     await expect(this.profileHeader).toBeVisible({
       timeout: 30_000,
     });
-    console.log("[verifyUserProfile] User profile page verified successfully");
+    logger.info("[verifyUserProfile] User profile page verified successfully");
     await this.page.waitForTimeout(2_000);
   }
 }
@@ -39,7 +40,7 @@ export class CommonPage {
   }
 
   async logout(): Promise<void> {
-    console.log("[logout] Logging out");
+    logger.info("[logout] Logging out");
     await this.settingsIcon.click();
     await this.page.waitForTimeout(500);
     await this.dynamicSelectors.menuOption("Logout").click();
@@ -48,11 +49,11 @@ export class CommonPage {
     await expect(platformPage.signInText).toBeVisible({
       timeout: 30_000,
     });
-    console.log("[logout] Logout successful");
+    logger.info("[logout] Logout successful");
   }
 
   async openUserProfile(): Promise<void> {
-    console.log("[openUserProfile] Opening user profile");
+    logger.info("[openUserProfile] Opening user profile");
     await this.settingsIcon.click();
     await this.page.waitForTimeout(500);
     const context = this.page.context();
@@ -64,7 +65,7 @@ export class CommonPage {
     const newPage = await newPagePromise;
     this.profilePage = new ProfilePage(newPage);
     await this.page.waitForTimeout(2_000);
-    console.log("[openUserProfile] User profile opened");
+    logger.info("[openUserProfile] User profile opened");
   }
 
   async verifyUserProfile(): Promise<void> {
@@ -76,7 +77,7 @@ export class CommonPage {
     await this.profilePage.verifyUserProfile();
     await this.page.bringToFront();
     await this.profilePage.page.close();
-    console.log("[verifyUserProfile] User profile verified and closed");
+    logger.info("[verifyUserProfile] User profile verified and closed");
     await this.page.waitForTimeout(5_000);
   }
 }

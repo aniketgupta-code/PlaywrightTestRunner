@@ -1,6 +1,5 @@
 import { Page, expect, Locator } from "@playwright/test";
-import { generateOtp } from "../utils";
-import { CommonPage } from "../pages";
+import { generateOtp, logger } from "../utils";
 
 export class PlatformPage {
   readonly emailInput: Locator;
@@ -20,12 +19,12 @@ export class PlatformPage {
   }
 
   async navigateToBasePage(url: string): Promise<void> {
-    console.log(`[navigateToBasePage] Navigating to ${url}`);
+    logger.info(`[navigateToBasePage] Navigating to ${url}`);
     await this.page.goto(url);
     await this.page.waitForTimeout(2_000);
     await this.page.waitForLoadState("networkidle");
-    console.log("[navigateToBasePage] Navigation complete");
-    console.log(
+    logger.info("[navigateToBasePage] Navigation complete");
+    logger.info(
       "[navigateToBasePage] Waiting for Sign In text and Continue button",
     );
     await expect(this.signInText).toBeVisible({
@@ -34,7 +33,7 @@ export class PlatformPage {
     await expect(this.continueButton).toBeVisible({
       timeout: 30_000,
     });
-    console.log("[navigateToBasePage] Login page loaded");
+    logger.info("[navigateToBasePage] Login page loaded");
   }
 
   async login(
@@ -42,7 +41,7 @@ export class PlatformPage {
     password: string,
     otpToken?: string,
   ): Promise<void> {
-    console.log(`[login] Logging in as ${email}`);
+    logger.info(`[login] Logging in as ${email}`);
     if (email.includes("@allegion.com")) {
       await this.loginInternalUser(email, password);
     } else {
@@ -51,7 +50,7 @@ export class PlatformPage {
   }
 
   async loginInternalUser(email: string, password: string): Promise<void> {
-    console.log(
+    logger.info(
       "[loginInternalUser] Internal user login flow not yet implemented",
     );
     // Internal users have a different login flow, so we handle them separately.
@@ -62,22 +61,24 @@ export class PlatformPage {
     password: string,
     otpToken?: string,
   ): Promise<void> {
-    console.log("[loginExternalUser] Filling email");
+    logger.info("[loginExternalUser] Filling email");
     await this.emailInput.isVisible({ timeout: 15_000 });
     await this.emailInput.fill(email);
     await this.page.waitForTimeout(1_000);
-    console.log("[loginExternalUser] Clicking Continue");
+    logger.info("[loginExternalUser] Clicking Continue");
     await this.continueButton.click();
-    console.log("[loginExternalUser] Filling password");
+    logger.info("[loginExternalUser] Filling password");
     await this.passwordInput.isVisible({ timeout: 15_000 });
     await this.passwordInput.fill(password);
     await this.page.waitForTimeout(1_000);
-    console.log("[loginExternalUser] Clicking Sign In");
+    logger.info("[loginExternalUser] Clicking Sign In");
     await this.signInButton.click();
-    console.log("[loginExternalUser] Filling OTP");
+    logger.info("[loginExternalUser] Filling OTP");
     await this.otpInput.isVisible({ timeout: 15_000 });
-    await this.otpInput.fill(await generateOtp(otpToken));
-    console.log("[loginExternalUser] Submitting OTP");
+    const { totp, timeRemaining } = await generateOtp(otpToken);
+    await this.otpInput.fill(totp);
+    logger.info(`[loginExternalUser] OTP valid for ${timeRemaining} seconds`);
+    logger.info("[loginExternalUser] Submitting OTP");
     await this.continueButton.click();
   }
 }

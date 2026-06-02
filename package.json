@@ -25,6 +25,7 @@
     "moment": "^2.29.4",
     "otplib": "^13.4.0",
     "superagent": "^8.1.2",
+    "tslog": "^4.10.2",
     "typescript": "^5.4.0"
   }
 }
