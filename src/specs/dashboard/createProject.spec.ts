@@ -6,6 +6,7 @@ import {
   currentTestData,
   fetchCredentials,
   currentTestStatus,
+  attachBrowserStackSessionLink,
 } from "../../utils";
 import { DashboardPage, PlatformPage, CommonPage } from "../../pages";
 import moment from "moment";
@@ -53,8 +54,9 @@ test.describe("Dashboard", () => {
     },
   );
 
-  test.afterEach(async () => {
+  test.afterEach(async ({ page }) => {
     const status = await currentTestStatus();
+    await attachBrowserStackSessionLink(page);
     logger.info(`[afterEach] Test completed with status: ${status}`);
   });
 });
